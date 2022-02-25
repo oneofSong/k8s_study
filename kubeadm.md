@@ -97,9 +97,7 @@ EOF
 
 - kubeamd init
     - 명령어
-        - ```console
-        # sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-cert-extra-sans=kube.example.org
-        ```
+        - ` # sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-cert-extra-sans=kube.example.org `
         - pod-network-cidr : 이후 추가할 에드온인 Flannel을 위해 추가. 반드시 ip는 `10.244.0.0/16`으로 설정
         - apiserver-cert-extra-sans : 이후 원격에서 kubectl을 사용하기 위해서 필요
 
@@ -150,7 +148,7 @@ EOF
 # kubectl taint nodes --all node-role.kubernetes.io/master-
 ```
     - 참고 : master node에 다시 taint 설정하기
-        - `kubectl taint nodes master node-role.kubernetes.io=master:NoSchedule`
+        - ` # kubectl taint nodes master node-role.kubernetes.io=master:NoSchedule `
 
 
 ## 3. TroubleShooting
@@ -163,9 +161,7 @@ EOF
 
 - 해결법 
     - kubelet log 확인
-        - ```console
-        # journalctl -xeu kubelet
-        ```
+        - ` # journalctl -xeu kubelet`
     - /etc/docker/daemon.json 작성이 되어 있는지 확인, 없을 시 아래 명령어 실행
         - ```console
             # cat <<EOF | sudo tee /etc/docker/daemon.json
@@ -193,10 +189,8 @@ EOF
             ```
     - 생성 후 kubeadm reset 및 init, 작동이 안될 시 리부팅 후 다시 실행
         - init 시 추가 명령어는 위에서 실행했던 명령과 동일하게 실행
-        - ```console
-        # kubeadm reset
-        # kubeadm init  [init 시 추가한 옵션, pod-network-cidr 등]
-        ```
+        - ` # kubeadm reset `
+        - ` # kubeadm init  [init 시 추가한 옵션, pod-network-cidr 등] `
         
 ### 2. flannel CrashLoopBackOff 에러
  - 발생 에러
@@ -215,11 +209,11 @@ EOF
     
 ### 3. Coredns CrashLoopBackOff 에러
 - 발생 에러
-    - ```console 
-    NAMESPACE     NAME                             READY   STATUS                 RESTARTS   AGE
-    kube-system   coredns-5644d7b6d9-c5mn2         0/1     CrashLoopBackOff       1          1m8s
-    kube-system   coredns-5644d7b6d9-s2rwt         0/1     CrashLoopBackOff       1          1m8s
-    ```
+```console 
+NAMESPACE     NAME                             READY   STATUS                 RESTARTS   AGE
+kube-system   coredns-5644d7b6d9-c5mn2         0/1     CrashLoopBackOff       1          1m8s
+kube-system   coredns-5644d7b6d9-s2rwt         0/1     CrashLoopBackOff       1          1m8s
+```
 
 - 원인 파악
     - coredns pod 로그 확인
@@ -227,10 +221,11 @@ EOF
     # kubectl get pod -n kube-system
     # kbuectl logs [coredns pod 이름 중 하나] -n kube-system
     ```
-    - ```console
+    - 
+    ```console
     plugin/loop: Loop (127.0.0.1:55953 -> :1053) detected for zone ".", see 
     https://coredns.io/plugins/loop#troubleshooting. Query: "HINFO 4547991504243258144.3688648895315093531."
-        ```
+    ```
     - 일반적으로는 CoreDNS의 Query 요청을 127.0.0.1, :: 1 또는 127.0.0.53과 같은 루프백 주소를 통해 자신에게 직접 전달하는 경우에 발생
     - 덜 일반적으로는 CoreDNS는 업스트림 서버로 전달하고 다시 CoreDNS로 요청을 전달합니다.
 
