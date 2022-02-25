@@ -67,9 +67,7 @@ EOF
     - ```#docker version``` 등의 명령어로 동작 확인
     
 - 참고 : docker 명령어 사용자 추가
-    - ```console
-    # sudo usermod -aG docker $USER
-    ```
+    - ` # sudo usermod -aG docker $USER `
 
 ### 3. kubeadm, kubelet, kubectl 설치
 - 패키지 update 및 종속 패키지 설치
