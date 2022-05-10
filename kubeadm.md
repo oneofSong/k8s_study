@@ -10,7 +10,7 @@
 
 ### 1. 패키지 업데이트
 ```console
-# sudo -s
+# su -
 # apt-get update -y && apt-get upgrade -y 
 ```
 
@@ -73,7 +73,7 @@ EOF
 - 패키지 update 및 종속 패키지 설치
 ```console
 # sudo apt-get update
-# sudo apt-get install -y apt-tranport-https ca-certificates curl
+# sudo apt-get install -y apt-transport-https ca-certificates curl
 ```
 
 - gpg 키 추가
@@ -95,6 +95,10 @@ EOF
 
 ### 4. kubernetes 클러스터 생성(마스터 노드)
 
+- swap off 하기
+    - off 명령어 : swapoff -a
+    - swap 상태 확인 : swapon -s
+        - 출력 내용이 없으면 off 상태
 - kubeamd init
     - 명령어
         - ` # sudo kubeadm init --pod-network-cidr=10.244.0.0/16 --apiserver-cert-extra-sans=kube.example.org `
@@ -231,10 +235,12 @@ kube-system   coredns-5644d7b6d9-s2rwt         0/1     CrashLoopBackOff       1 
 
 - 해결 방법
     - DNS ip 확인 `nmcli device show | grep IP4.DNS`
-    - `vi /etc/resolvconf/resolv.conf.d/head`에 내용 추가 `nameserver <DNS IP>
+    - `vi /etc/resolvconf/resolv.conf.d/head`에 내용 추가 `nameserver <DNS IP>`
     - 수정된 resolve.conf 적용 
-      `# sudo resolveconf -u`
+    
+      `# sudo resolvconf -u`
     - 수정된 /etc/resolve.conf 확인 
+    
        `# cat resolv.conf`
     - coredns roleback
         ```console
@@ -242,8 +248,20 @@ kube-system   coredns-5644d7b6d9-s2rwt         0/1     CrashLoopBackOff       1 
         ```
     
 
-
+### 4. unknown service runtime.v1alpha2.RuntimeService 에러
+- `kubeamd init` 실행 시 발생
+ ``` text
+ listing containers: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService
+ ```
+ - 원인 : containerd의 config가 정확하게 설정되어 있지 않아 발생하는 것으로 추정
  
+ - 해결 방법 
+     - docker 및 containerd 서비스 종료
+         - `# service docker stop`
+         - `# service containerd stop`
+     - /etc/containerd/config.toml 삭제
+         - `rm /etc/containerd/config.toml`
+     - docker 재시작
 
 ## 참고
 
@@ -257,3 +275,4 @@ kube-system   coredns-5644d7b6d9-s2rwt         0/1     CrashLoopBackOff       1 
 - [coredns troublshooting](https://coredns.io/plugins/loop/#troubleshooting)
 - [How do I force Kubernetes CoreDNS to reload its Config Map after a change?
 ](https://stackoverflow.com/questions/53498438/how-do-i-force-kubernetes-coredns-to-reload-its-config-map-after-a-change)
+- [unknown service runtime.v1alpha2.ImageService](https://github.com/kubernetes-sigs/cri-tools/issues/710)
