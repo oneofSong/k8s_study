@@ -105,7 +105,7 @@ EOF
         - pod-network-cidr : 이후 추가할 에드온인 Flannel을 위해 추가. 반드시 ip는 `10.244.0.0/16`으로 설정
         - apiserver-cert-extra-sans : 이후 원격에서 kubectl을 사용하기 위해서 필요
 
-    - 실햏 결과
+    - 실행 결과
 
     ```text
     Your Kubernetes control-plane has initialized successfully!
@@ -124,6 +124,7 @@ EOF
 
     ```
 - Flannel Network 애드온 추가
+    - coredns가 동작하기 위해서는 network plugin이 필요
     - ```console
         # kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
     ```
@@ -253,15 +254,37 @@ kube-system   coredns-5644d7b6d9-s2rwt         0/1     CrashLoopBackOff       1 
  ``` text
  listing containers: rpc error: code = Unimplemented desc = unknown service runtime.v1alpha2.RuntimeService
  ```
- - 원인 : containerd의 config가 정확하게 설정되어 있지 않아 발생하는 것으로 추정
+ - 원인 
+     - kubernetes에서 실행될 컨테이너 런타임 인터페이스(CRI)가 정확하게 지정되지 않아서 발생하는 에러
  
  - 해결 방법 
+     - CRI를 재시작(docker or containerd) 및 설정 삭제
      - docker 및 containerd 서비스 종료
          - `# service docker stop`
          - `# service containerd stop`
      - /etc/containerd/config.toml 삭제
          - `rm /etc/containerd/config.toml`
      - docker 재시작
+     
+     
+ ### 5. taint "node-role.kubernetes.io/master:" not found
+ - `kubectl taint nodes --all node-role.kubernetes.io/master-` 명령어 실행 시 발생
+ 
+ - 원인 : master 노드가 존재 하지 않아 taint 명령어가 실행되지 않음
+ 
+ - 해결 방법 
+     - `kubectl get node`를 통해 node의 이름을 확인
+       ```txt
+       NAME     STATUS   ROLES           AGE   VERSION
+       aiuser   Ready    control-plane   17h   v1.24.0
+       ```
+     
+     - `kubectl describe node <nodename> | grep Taints` 를 통해 taint 상태를 확인
+        ``` txt
+        Taints:             node-role.kubernetes.io/control-plane:NoSchedule
+        ```
+     - 다음과 같이 taint에 있는 :Noschedule 대신 -를 명령어에 포함하여 taint 명령어 실행. `kubectl taint nodes --all node-role.kubernetes.io/control-plane-` 
+
 
 ## 참고
 
