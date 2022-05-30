@@ -138,7 +138,7 @@ EOF
     kube-system   kube-controller-manager-ubuntu   1/1     Running   0          7m4s
     kube-system   kube-flannel-ds-amd64-hwdfq      1/1     Running   0          93s
     kube-system   kube-proxy-fsgmj                 1/1     Running   0          8m8s
-    kube-system   kube-scheduler-ubuntu            1/1     Running   0          7m25s
+    kube-system   kube-scheduler-ubuntu  kub          1/1     Running   0          7m25s
     ```
     
 - kubectl 설정
